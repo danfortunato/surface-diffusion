@@ -58,7 +58,7 @@ function u = N(u)
     v = plan.coeffs2vals(u);
     v = beta + (v.^nu)./(v.^nu + gamma^nu);
     U2 = plan.vals2coeffs(v);
-    scl = 1 - alpha*2*pi*u(1)/sqrt(4*pi);
+    scl = 1 - alpha*u(1)/sqrt(pi);
     u = scl*U2 - u;
 end
 
