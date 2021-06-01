@@ -1,0 +1,29 @@
+# Videos
+*.mp4
+frames/
+
+# macOS
+.DS_Store?
+.Spotlight-V100
+.Trashes
+
+# MATLAB
+*.~
+*.asv
+*.mex*
+
+# LaTeX
+*.aux
+*.bbl
+*.out
+*.blg
+*.log
+*.thm
+*.fdb_latexmk
+*.fls
+*.vrb
+*.brf
+*.toc
+*.synctex
+*.synctex.gz
+*-converted-to.*
