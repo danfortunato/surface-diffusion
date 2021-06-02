@@ -1,6 +1,7 @@
-# Videos
+# Data
 *.mp4
 frames/
+data/
 
 # macOS
 .DS_Store?
