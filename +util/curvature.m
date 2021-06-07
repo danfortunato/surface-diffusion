@@ -70,6 +70,7 @@ else
     % Curvature
     gc = (L.*N - M.^2) ./ D;
     mc = (E.*N + G.*L - 2*F.*M) ./ (2*D);
+
 end
 
 end
