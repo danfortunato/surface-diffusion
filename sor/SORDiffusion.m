@@ -51,6 +51,7 @@ alpha = params.alpha;
 beta  = params.beta;
 nu    = params.nu;
 gamma = params.gamma;
+gamma_nu = gamma^nu;
 
 % Discretization parameters:
 nlat  = params.nlat;
@@ -64,7 +65,7 @@ dt = tend/nsteps;
 
 % Build the Laplace-Beltrami solver
 cscl = -1./(dt*delta^2);
-L = LaplaceBeltramiDFS(rho, theta, nlon, nlat, cscl);
+L = LaplaceBeltramiDFS(rho, theta, nlon, nlat, cscl, params.nthreads);
 
 if ( ~params.quiet )
     fprintf('\n')
@@ -118,7 +119,8 @@ end
 
     function u = N_direct(u)
         v = util.coeffs2valsDbl(u);
-        v = beta + (v.^nu)./(v.^nu + gamma^nu);
+        v_nu = v.^nu;
+        v = beta + v_nu./(v_nu + gamma_nu);
         U2 = util.vals2coeffsDbl(v);
         scl = 1 - alpha/fac * L.integral2(u);
         u = scl*U2 - u;

@@ -2,7 +2,6 @@ classdef LaplaceBeltramiDFS %#ok<*PROPLC>
 
     properties
 
-        A     % Cell array of discretized ODOs for each longitudinal mode
         scl   % Scale factor for all ODEs
         ns    % Number of longitudinal Fourier modes
         nt    % Number of latitudinal modes (doubled up)
@@ -30,18 +29,24 @@ classdef LaplaceBeltramiDFS %#ok<*PROPLC>
         ss1
         tt1
         bc
+        A  % Banded LU decompositions batched over longitudinal modes
+        A0 % LU Decomposition for the zero mode (used only when c=0)
 
     end
 
     methods
 
-        function L = LaplaceBeltramiDFS(rho, theta, ns, nt, c)
+        function L = LaplaceBeltramiDFS(rho, theta, ns, nt, c, nthreads)
 
             % The operator is lap(u) + c*u
             if ( nargin < 5 )
                 L.c = 0;
             else
                 L.c = c;
+            end
+
+            if ( nargin < 6 )
+                nthreads = maxNumCompThreads;
             end
 
             L.ns  = ns;
@@ -97,15 +102,14 @@ classdef LaplaceBeltramiDFS %#ok<*PROPLC>
             M2   = trigspec.multmat(L.nt, a02);
             Mscl = trigspec.multmat(L.nt, scl);
 
-            L.A = cell(L.ns, 1);
+            A = cell(L.ns, 1);
             negk = -floor(L.ns/2):-1;
             posk = 1:(floor(L.ns/2)-(mod(L.ns,2)==0));
-            for k = [negk posk]
-                L.A{os+k} = M2*D2 + M1*D1 - k^2*M0 + L.c*Mscl;
-                L.A{os+k} = decomposition(L.A{os+k});
+            prealloc = M2*D2 + M1*D1 - M0 + L.c*Mscl;
+            for k = [negk 0 posk]
+                A{os+k} = prealloc + (1-k^2)*M0;
             end
 
-            A = M2*D2 + M1*D1 + L.c*Mscl;
             fac = chebfun(@(t) sqrt(rho(t).^2.*dt(t).^2 + dr(t).^2).*rho(t).*sin(theta(t)), [0 pi]);
             mm = -floor(L.nt/2):ceil(L.nt/2)-1;
             trigs = chebfun(@(t) exp(1i*mm.*t), [0 pi]);
@@ -114,13 +118,15 @@ classdef LaplaceBeltramiDFS %#ok<*PROPLC>
             if ( L.c == 0 )
                 % The k=0 mode has an integral constraint
                 % Replace the zero-mode row with this constraint
-                A(ot,:) = L.bc;
+                A{os}(ot,:) = L.bc;
+                L.A0 = decomposition(A{os});
+                A{os} = A{1}; % We will eat the cost of one extra inversion
             end
-            L.A{os} = A;
-            L.A{os} = decomposition(L.A{os});
+            L.A = BandedBatch(A, nthreads);
+            toc
 
             % We scale the equations by this factor
-            L.scl = Mscl;
+            L.scl = full(Mscl); % Dense matrix multiplication is faster
 
             L.x = chebfun2(@(s,t) L.rho(t).*sin(L.theta(t)).*cos(s), L.dom1);
             L.y = chebfun2(@(s,t) L.rho(t).*sin(L.theta(t)).*sin(s), L.dom1);
@@ -171,19 +177,16 @@ classdef LaplaceBeltramiDFS %#ok<*PROPLC>
             % Scale the RHS by scl
             F = L.scl * F;
 
-            U = zeros(L.nt, L.ns);
-            negk = -floor(L.ns/2):-1;
-            posk = 1:(floor(L.ns/2)-(mod(L.ns,2)==0));
-            for k = [negk posk]
-                U(:,os+k) = L.A{os+k} \ F(:,os+k);
-            end
+            % Do a batch solve
+            U = L.A \ F;
 
-            ff = F(:,os);
             if ( L.c == 0 )
                 % The k=0 mode has an integral constraint
+                ff = F(:,os);
                 ff(ot) = 0;
+                U(:,os) = L.A0 \ ff;
             end
-            U(:,os) = L.A{os} \ ff;
+
             U(ot,os) = U(ot,os) + const;
             u = U;
 

@@ -56,6 +56,7 @@ params.tend = 300;
 params.dt   = 0.1;
 params.nlat = 128;
 params.nlon = 128;
+params.nthreads = 8;
 params.useHeaviside     = false;
 params.trueConservation = false;
 
