@@ -1,0 +1,7 @@
+CXX       = g++
+MEX       = mex
+MWRAP     = mwrap
+LIBS      = -llapack
+MATLABDIR = /usr/local/MATLAB/R2021a
+CXXFLAGS  = -fopenmp -O3 -march=native -fPIC -fno-math-errno -idirafter $(MATLABDIR)/extern/include
+MEXFLAGS  = -largeArrayDims -DR2008OO CXX=$(CXX) CXXFLAGS='$(CXXFLAGS)' CXXOPTIMFLAGS='' LDFLAGS='$(LDFLAGS)'

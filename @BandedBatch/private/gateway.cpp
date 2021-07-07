@@ -959,7 +959,7 @@ mxArray* func(const T* q, mwSize m, mwSize n) \
 
 #endif
 
- #include <lapack.h>
+ #include <lapacke.h>
  #include <omp.h>
 
  void factor_banded_batch(int n, int kl, int ku, double *A, int *ipiv, int nbatch, int nthreads)
@@ -968,7 +968,7 @@ mxArray* func(const T* q, mwSize m, mwSize n) \
      int ldab = 2*kl+ku+1;
      #pragma omp parallel for num_threads(nthreads) schedule(static)
      for (int k=0; k<nbatch; ++k) {
-         dgbtrf_(&n, &n, &kl, &ku, A+k*ldab*n, &ldab, ipiv+k*n, &info);
+         LAPACKE_dgbtrf(LAPACK_COL_MAJOR, n, n, kl, ku, A+k*ldab*n, ldab, ipiv+k*n);
      }
  }
 
@@ -981,7 +981,7 @@ mxArray* func(const T* q, mwSize m, mwSize n) \
      int ldb = n;
      #pragma omp parallel for num_threads(nthreads) schedule(static)
      for (int k=0; k<nbatch; ++k) {
-         dgbtrs_(&trans, &n, &kl, &ku, &nrhs, A+k*ldab*n, &ldab, ipiv+k*n, b+k*n, &ldb, &info);
+         LAPACKE_dgbtrs(LAPACK_COL_MAJOR, trans, n, kl, ku, nrhs, A+k*ldab*n, ldab, ipiv+k*n, b+k*n, ldb);
      }
  }
 

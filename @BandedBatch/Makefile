@@ -1,12 +1,4 @@
-CXX      = g++-11
-MEX      = mex
-MWRAP    = mwrap
-LIBS     = -llapack
-LIBDIR   = -L/usr/local/opt/lapack/lib
-INCDIR   = -I/usr/local/opt/lapack/include
-CXXFLAGS = -fopenmp -O3 -march=native -fPIC -fno-math-errno
-LDFLAGS  = -flat_namespace -undefined warning
-MEXFLAGS = -largeArrayDims -DR2008OO CXX=$(CXX) CXXFLAGS='$(CXXFLAGS)' CXXOPTIMFLAGS='' LDFLAGS='$(LDFLAGS)'
+-include make.inc
 
 default: mex
 
