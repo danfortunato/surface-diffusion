@@ -13,7 +13,7 @@ private/gateway.cpp: BandedBatch.mw
 mex: private/gateway.mex*
 private/gateway.mex*: private/gateway.cpp
 	cd private && \
-	$(MEX) gateway.cpp $(INCDIR) $(MEXFLAGS) $(LIBDIR) $(LIB) -output gateway
+	$(MEX) gateway.cpp $(INCDIR) $(MEXFLAGS) $(LIBDIR) $(LIBS) -output gateway
 
 # Remove the MEX interface
 clean:

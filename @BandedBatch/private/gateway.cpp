@@ -959,7 +959,7 @@ mxArray* func(const T* q, mwSize m, mwSize n) \
 
 #endif
 
- #include <lapacke.h>
+ #include <lapack.h>
  #include <omp.h>
 
  void factor_banded_batch(int n, int kl, int ku, double *A, int *ipiv, int nbatch, int nthreads)
@@ -968,7 +968,7 @@ mxArray* func(const T* q, mwSize m, mwSize n) \
      int ldab = 2*kl+ku+1;
      #pragma omp parallel for num_threads(nthreads) schedule(static)
      for (int k=0; k<nbatch; ++k) {
-         LAPACKE_dgbtrf(LAPACK_COL_MAJOR, n, n, kl, ku, A+k*ldab*n, ldab, ipiv+k*n);
+         dgbtrf_(&n, &n, &kl, &ku, A+k*ldab*n, &ldab, ipiv+k*n, &info);
      }
  }
 
@@ -981,7 +981,11 @@ mxArray* func(const T* q, mwSize m, mwSize n) \
      int ldb = n;
      #pragma omp parallel for num_threads(nthreads) schedule(static)
      for (int k=0; k<nbatch; ++k) {
-         LAPACKE_dgbtrs(LAPACK_COL_MAJOR, trans, n, kl, ku, nrhs, A+k*ldab*n, ldab, ipiv+k*n, b+k*n, ldb);
+         dgbtrs_(&trans, &n, &kl, &ku, &nrhs, A+k*ldab*n, &ldab, ipiv+k*n, b+k*n, &ldb, &info
+ #ifdef LAPACK_FORTRAN_STRLEN_END
+             , 1
+ #endif
+         );
      }
  }
 
@@ -1044,7 +1048,7 @@ mxWrapGetArrayDef_single(mxWrapGetArray_single_size_t, size_t)
 mxWrapCopyDef_single    (mxWrapCopy_single_size_t,     size_t)
 mxWrapReturnDef_single  (mxWrapReturn_single_size_t,   size_t)
 
-/* ---- BandedBatch.mw: 77 ----
+/* ---- BandedBatch.mw: 81 ----
  * factor_banded_batch(int n, int kl, int ku, inout double[na] A, output int[nb] ipiv, int nbatch, int nthreads);
  */
 static const char* stubids1_ = "factor_banded_batch(i int, i int, i int, io double[x], o int[x], i int, i int)";
@@ -1122,7 +1126,7 @@ mw_err_label:
         mexErrMsgTxt(mw_err_txt_);
 }
 
-/* ---- BandedBatch.mw: 107 ----
+/* ---- BandedBatch.mw: 111 ----
  * solve_banded_batch(int n, int kl, int ku, double[na] A, int[nb] ipiv, inout double[nb] x, int nbatch, int nthreads);
  */
 static const char* stubids2_ = "solve_banded_batch(i int, i int, i int, i double[x], i int[x], io double[x], i int, i int)";
@@ -1257,8 +1261,8 @@ void mexFunction(int nlhs, mxArray* plhs[],
     } else if (strcmp(id, "*profile report*") == 0) {
         if (!mexprofrecord_)
             mexPrintf("Profiler inactive\n");
-        mexPrintf("%d calls to BandedBatch.mw:77\n", mexprofrecord_[1]);
-        mexPrintf("%d calls to BandedBatch.mw:107\n", mexprofrecord_[2]);
+        mexPrintf("%d calls to BandedBatch.mw:81\n", mexprofrecord_[1]);
+        mexPrintf("%d calls to BandedBatch.mw:111\n", mexprofrecord_[2]);
     } else if (strcmp(id, "*profile log*") == 0) {
         FILE* logfp;
         if (nrhs != 2 || mxGetString(prhs[1], id, sizeof(id)) != 0)
@@ -1268,8 +1272,8 @@ void mexFunction(int nlhs, mxArray* plhs[],
             mexErrMsgTxt("Cannot open log for output");
         if (!mexprofrecord_)
             fprintf(logfp, "Profiler inactive\n");
-        fprintf(logfp, "%d calls to BandedBatch.mw:77\n", mexprofrecord_[1]);
-        fprintf(logfp, "%d calls to BandedBatch.mw:107\n", mexprofrecord_[2]);
+        fprintf(logfp, "%d calls to BandedBatch.mw:81\n", mexprofrecord_[1]);
+        fprintf(logfp, "%d calls to BandedBatch.mw:111\n", mexprofrecord_[2]);
         fclose(logfp);
     } else
         mexErrMsgTxt("Unknown identifier");
