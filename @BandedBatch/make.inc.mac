@@ -1,9 +1,9 @@
 CXX      = g++-11
 MEX      = mex
 MWRAP    = mwrap
-LIBS     = -llapack
+LIBS     = -llapacke -llapack -lgomp
 LIBDIR   = -L/usr/local/opt/lapack/lib
 INCDIR   = -I/usr/local/opt/lapack/include
 CXXFLAGS = -fopenmp -O3 -march=native -fPIC -fno-math-errno
-LDFLAGS  = -flat_namespace -undefined warning
+LDFLAGS  = -bundle
 MEXFLAGS = -largeArrayDims -DR2008OO CXX=$(CXX) CXXFLAGS='$(CXXFLAGS)' CXXOPTIMFLAGS='' LDFLAGS='$(LDFLAGS)'
