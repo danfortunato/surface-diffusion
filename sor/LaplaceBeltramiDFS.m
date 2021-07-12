@@ -85,14 +85,10 @@ classdef LaplaceBeltramiDFS %#ok<*PROPLC>
             scl = rho.^2.*sin(theta).^2.*(rho.^2.*dt.^2 + dr.^2).^2;
 
             % Convert to trig
-            a00 = chebfun(@(t) a00(t), [  0 pi], 'trig');
-            a00 = chebfun(@(t) a00(t), [-pi pi], 'trig');
-            a01 = chebfun(@(t) a01(t), [  0 pi], 'trig');
-            a01 = chebfun(@(t) a01(t), [-pi pi], 'trig');
-            a02 = chebfun(@(t) a02(t), [  0 pi], 'trig');
-            a02 = chebfun(@(t) a02(t), [-pi pi], 'trig');
-            scl = chebfun(@(t) scl(t), [  0 pi], 'trig');
-            scl = chebfun(@(t) scl(t), [-pi pi], 'trig');
+            a00 = periodize(a00);
+            a01 = periodize(a01, 'flip');
+            a02 = periodize(a02);
+            scl = periodize(scl);
 
             % Construct the differential operators
             D1   = trigspec.diffmat(L.nt, 1, 1);
@@ -231,5 +227,21 @@ classdef LaplaceBeltramiDFS %#ok<*PROPLC>
         end
 
     end
+
+end
+
+function f = periodize(f, flipFlag)
+
+if ( nargin < 2 )
+    flipFlag = '';
+end
+
+if ( strcmpi(flipFlag, 'flip') )
+    f = chebfun({@(t) -f(-t), @(t) f(t)}, [-pi 0 pi]);
+else
+    f = chebfun({@(t)  f(-t), @(t) f(t)}, [-pi 0 pi]);
+end
+
+f = chebfun(@(t) f(t), [-pi pi], 'trig');
 
 end
