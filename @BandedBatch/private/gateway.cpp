@@ -1124,8 +1124,9 @@ mw_err_label:
         mexErrMsgTxt(mw_err_txt_);
 }
 
-/* ---- BandedBatch.mw: 109 ----
+/* ---- BandedBatch.mw: 110 ----
  * solve_banded_batch(int n, int kl, int ku, double[na] A, int[nb] ipiv, inout double[nb] x, int nbatch, int nthreads);
+ * Also at BandedBatch.mw: 116
  */
 static const char* stubids2_ = "solve_banded_batch(i int, i int, i int, i double[x], i int[x], io double[x], i int, i int)";
 
@@ -1260,7 +1261,7 @@ void mexFunction(int nlhs, mxArray* plhs[],
         if (!mexprofrecord_)
             mexPrintf("Profiler inactive\n");
         mexPrintf("%d calls to BandedBatch.mw:79\n", mexprofrecord_[1]);
-        mexPrintf("%d calls to BandedBatch.mw:109\n", mexprofrecord_[2]);
+        mexPrintf("%d calls to BandedBatch.mw:110 (BandedBatch.mw:116)\n", mexprofrecord_[2]);
     } else if (strcmp(id, "*profile log*") == 0) {
         FILE* logfp;
         if (nrhs != 2 || mxGetString(prhs[1], id, sizeof(id)) != 0)
@@ -1271,7 +1272,7 @@ void mexFunction(int nlhs, mxArray* plhs[],
         if (!mexprofrecord_)
             fprintf(logfp, "Profiler inactive\n");
         fprintf(logfp, "%d calls to BandedBatch.mw:79\n", mexprofrecord_[1]);
-        fprintf(logfp, "%d calls to BandedBatch.mw:109\n", mexprofrecord_[2]);
+        fprintf(logfp, "%d calls to BandedBatch.mw:110 (BandedBatch.mw:116)\n", mexprofrecord_[2]);
         fclose(logfp);
     } else
         mexErrMsgTxt("Unknown identifier");

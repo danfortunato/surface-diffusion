@@ -1,6 +1,6 @@
 -include make.inc
 
-default: mex
+default: mwrap mex
 
 # Rebuild BandedBatch.m and gateway.cpp via MWrap
 mwrap: BandedBatch.m private/gateway.cpp

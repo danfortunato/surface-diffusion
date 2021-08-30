@@ -102,9 +102,11 @@ classdef LaplaceBeltramiDFS %#ok<*PROPLC>
             negk = -floor(L.ns/2):-1;
             posk = 1:(floor(L.ns/2)-(mod(L.ns,2)==0));
             prealloc = M2*D2 + M1*D1 - M0 + L.c*Mscl;
-            for k = [negk 0 posk]
+            for k = [negk posk]
                 A{os+k} = prealloc + (1-k^2)*M0;
             end
+            % The zero mode contains no M0 term
+            A{os} = M2*D2 + M1*D1 + L.c*Mscl;
 
             fac = chebfun(@(t) sqrt(rho(t).^2.*dt(t).^2 + dr(t).^2).*rho(t).*sin(theta(t)), [0 pi]);
             mm = -floor(L.nt/2):ceil(L.nt/2)-1;
@@ -119,7 +121,6 @@ classdef LaplaceBeltramiDFS %#ok<*PROPLC>
                 A{os} = A{1}; % We will eat the cost of one extra inversion
             end
             L.A = BandedBatch(A, nthreads);
-            toc
 
             % We scale the equations by this factor
             L.scl = full(Mscl); % Dense matrix multiplication is faster
