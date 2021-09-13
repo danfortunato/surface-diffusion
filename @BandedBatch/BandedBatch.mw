@@ -1,10 +1,10 @@
 $ #include <lapacke.h>
 $ #include <omp.h>
 $
-$ void factor_banded_batch(int n, int kl, int ku, double *A, int *ipiv, int nbatch, int nthreads)
+$ void factor_banded_batch(lapack_int n, lapack_int kl, lapack_int ku, double *A, lapack_int *ipiv, int nbatch, int nthreads)
 $ {
-$     int info;
-$     int ldab = 2*kl+ku+1;
+$     lapack_int info;
+$     lapack_int ldab = 2*kl+ku+1;
 $     #pragma omp parallel for num_threads(nthreads) schedule(static)
 $     for (int k=0; k<nbatch; ++k) {
 $         LAPACK_dgbtrf(&n, &n, &kl, &ku, A+k*ldab*n, &ldab, ipiv+k*n, &info);
@@ -12,13 +12,13 @@ $         // LAPACKE_dgbtrf(LAPACK_COL_MAJOR, n, n, kl, ku, A+k*ldab*n, ldab, ip
 $     }
 $ }
 $
-$ void solve_banded_batch(int n, int kl, int ku, const double *A, const int *ipiv, double *b, int nbatch, int nthreads)
+$ void solve_banded_batch(lapack_int n, lapack_int kl, lapack_int ku, const double *A, const lapack_int *ipiv, double *b, int nbatch, int nthreads)
 $ {
 $     char trans = 'n';
-$     int nrhs = 1;
-$     int info;
-$     int ldab = 2*kl+ku+1;
-$     int ldb = n;
+$     lapack_int nrhs = 1;
+$     lapack_int info;
+$     lapack_int ldab = 2*kl+ku+1;
+$     lapack_int ldb = n;
 $     #pragma omp parallel for num_threads(nthreads) schedule(static)
 $     for (int k=0; k<nbatch; ++k) {
 $         LAPACK_dgbtrs(&trans, &n, &kl, &ku, &nrhs, A+k*ldab*n, &ldab, ipiv+k*n, b+k*n, &ldb, &info);
@@ -26,6 +26,7 @@ $         // LAPACKE_dgbtrs(LAPACK_COL_MAJOR, trans, n, kl, ku, nrhs, A+k*ldab*n
 $     }
 $ }
 $
+# typedef numeric lapack_int;
 classdef BandedBatch %#ok<*PROPLC,*PREALL>
 
     properties ( SetAccess = private )
@@ -76,7 +77,7 @@ classdef BandedBatch %#ok<*PROPLC,*PREALL>
             A = A(:);
 
             % Compute a banded LU decomposition of each matrix.
-            # factor_banded_batch(int n, int kl, int ku, inout double[na] A, output int[nb] ipiv, int nbatch, int nthreads);
+            # factor_banded_batch(lapack_int n, lapack_int kl, lapack_int ku, inout double[na] A, output lapack_int[nb] ipiv, int nbatch, int nthreads);
 
             obj.n = n;
             obj.kl = kl;
@@ -107,14 +108,14 @@ classdef BandedBatch %#ok<*PROPLC,*PREALL>
 
             % Solve using the banded LU decompositions.
             if ( isreal(x) )
-                # solve_banded_batch(int n, int kl, int ku, double[na] A, int[nb] ipiv, inout double[nb] x, int nbatch, int nthreads);
+                # solve_banded_batch(lapack_int n, lapack_int kl, lapack_int ku, double[na] A, lapack_int[nb] ipiv, inout double[nb] x, int nbatch, int nthreads);
             else
                 % If the RHS is complex then we need to do two solves:
                 % one for the real part and one for the imaginary part.
                 xreal = real(x);
                 ximag = imag(x);
-                # solve_banded_batch(int n, int kl, int ku, double[na] A, int[nb] ipiv, inout double[nb] xreal, int nbatch, int nthreads);
-                # solve_banded_batch(int n, int kl, int ku, double[na] A, int[nb] ipiv, inout double[nb] ximag, int nbatch, int nthreads);
+                # solve_banded_batch(lapack_int n, lapack_int kl, lapack_int ku, double[na] A, lapack_int[nb] ipiv, inout double[nb] xreal, int nbatch, int nthreads);
+                # solve_banded_batch(lapack_int n, lapack_int kl, lapack_int ku, double[na] A, lapack_int[nb] ipiv, inout double[nb] ximag, int nbatch, int nthreads);
                 x = xreal + ximag*1i;
             end
 

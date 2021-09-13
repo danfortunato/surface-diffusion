@@ -48,7 +48,7 @@ classdef BandedBatch %#ok<*PROPLC,*PREALL>
             A = A(:);
 
             % Compute a banded LU decomposition of each matrix.
-            mex_id_ = 'factor_banded_batch(i int, i int, i int, io double[x], o int[x], i int, i int)';
+            mex_id_ = 'factor_banded_batch(i lapack_int, i lapack_int, i lapack_int, io double[x], o lapack_int[x], i int, i int)';
 [A, ipiv] = gateway(mex_id_, n, kl, ku, A, nbatch, nthreads, na, nb);
 
             obj.n = n;
@@ -80,16 +80,16 @@ classdef BandedBatch %#ok<*PROPLC,*PREALL>
 
             % Solve using the banded LU decompositions.
             if ( isreal(x) )
-                mex_id_ = 'solve_banded_batch(i int, i int, i int, i double[x], i int[x], io double[x], i int, i int)';
+                mex_id_ = 'solve_banded_batch(i lapack_int, i lapack_int, i lapack_int, i double[x], i lapack_int[x], io double[x], i int, i int)';
 [x] = gateway(mex_id_, n, kl, ku, A, ipiv, x, nbatch, nthreads, na, nb, nb);
             else
                 % If the RHS is complex then we need to do two solves:
                 % one for the real part and one for the imaginary part.
                 xreal = real(x);
                 ximag = imag(x);
-                mex_id_ = 'solve_banded_batch(i int, i int, i int, i double[x], i int[x], io double[x], i int, i int)';
+                mex_id_ = 'solve_banded_batch(i lapack_int, i lapack_int, i lapack_int, i double[x], i lapack_int[x], io double[x], i int, i int)';
 [xreal] = gateway(mex_id_, n, kl, ku, A, ipiv, xreal, nbatch, nthreads, na, nb, nb);
-                mex_id_ = 'solve_banded_batch(i int, i int, i int, i double[x], i int[x], io double[x], i int, i int)';
+                mex_id_ = 'solve_banded_batch(i lapack_int, i lapack_int, i lapack_int, i double[x], i lapack_int[x], io double[x], i int, i int)';
 [ximag] = gateway(mex_id_, n, kl, ku, A, ipiv, ximag, nbatch, nthreads, na, nb, nb);
                 x = xreal + ximag*1i;
             end

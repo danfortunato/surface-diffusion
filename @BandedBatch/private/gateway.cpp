@@ -962,10 +962,10 @@ mxArray* func(const T* q, mwSize m, mwSize n) \
  #include <lapacke.h>
  #include <omp.h>
 
- void factor_banded_batch(int n, int kl, int ku, double *A, int *ipiv, int nbatch, int nthreads)
+ void factor_banded_batch(lapack_int n, lapack_int kl, lapack_int ku, double *A, lapack_int *ipiv, int nbatch, int nthreads)
  {
-     int info;
-     int ldab = 2*kl+ku+1;
+     lapack_int info;
+     lapack_int ldab = 2*kl+ku+1;
      #pragma omp parallel for num_threads(nthreads) schedule(static)
      for (int k=0; k<nbatch; ++k) {
          LAPACK_dgbtrf(&n, &n, &kl, &ku, A+k*ldab*n, &ldab, ipiv+k*n, &info);
@@ -973,13 +973,13 @@ mxArray* func(const T* q, mwSize m, mwSize n) \
      }
  }
 
- void solve_banded_batch(int n, int kl, int ku, const double *A, const int *ipiv, double *b, int nbatch, int nthreads)
+ void solve_banded_batch(lapack_int n, lapack_int kl, lapack_int ku, const double *A, const lapack_int *ipiv, double *b, int nbatch, int nthreads)
  {
      char trans = 'n';
-     int nrhs = 1;
-     int info;
-     int ldab = 2*kl+ku+1;
-     int ldb = n;
+     lapack_int nrhs = 1;
+     lapack_int info;
+     lapack_int ldab = 2*kl+ku+1;
+     lapack_int ldb = n;
      #pragma omp parallel for num_threads(nthreads) schedule(static)
      for (int k=0; k<nbatch; ++k) {
          LAPACK_dgbtrs(&trans, &n, &kl, &ku, &nrhs, A+k*ldab*n, &ldab, ipiv+k*n, b+k*n, &ldb, &info);
@@ -1021,6 +1021,12 @@ mxWrapReturnDef  (mxWrapReturn_int,   int)
 mxWrapGetArrayDef_single(mxWrapGetArray_single_int, int)
 mxWrapCopyDef_single    (mxWrapCopy_single_int,     int)
 mxWrapReturnDef_single  (mxWrapReturn_single_int,   int)
+mxWrapGetArrayDef(mxWrapGetArray_lapack_int, lapack_int)
+mxWrapCopyDef    (mxWrapCopy_lapack_int,     lapack_int)
+mxWrapReturnDef  (mxWrapReturn_lapack_int,   lapack_int)
+mxWrapGetArrayDef_single(mxWrapGetArray_single_lapack_int, lapack_int)
+mxWrapCopyDef_single    (mxWrapCopy_single_lapack_int,     lapack_int)
+mxWrapReturnDef_single  (mxWrapReturn_single_lapack_int,   lapack_int)
 mxWrapGetArrayDef(mxWrapGetArray_long, long)
 mxWrapCopyDef    (mxWrapCopy_long,     long)
 mxWrapReturnDef  (mxWrapReturn_long,   long)
@@ -1046,22 +1052,22 @@ mxWrapGetArrayDef_single(mxWrapGetArray_single_size_t, size_t)
 mxWrapCopyDef_single    (mxWrapCopy_single_size_t,     size_t)
 mxWrapReturnDef_single  (mxWrapReturn_single_size_t,   size_t)
 
-/* ---- BandedBatch.mw: 79 ----
- * factor_banded_batch(int n, int kl, int ku, inout double[na] A, output int[nb] ipiv, int nbatch, int nthreads);
+/* ---- BandedBatch.mw: 80 ----
+ * factor_banded_batch(lapack_int n, lapack_int kl, lapack_int ku, inout double[na] A, output lapack_int[nb] ipiv, int nbatch, int nthreads);
  */
-static const char* stubids1_ = "factor_banded_batch(i int, i int, i int, io double[x], o int[x], i int, i int)";
+static const char* stubids1_ = "factor_banded_batch(i lapack_int, i lapack_int, i lapack_int, io double[x], o lapack_int[x], i int, i int)";
 
 void mexStub1(int nlhs, mxArray* plhs[],
               int nrhs, const mxArray* prhs[])
 {
     const char* mw_err_txt_ = 0;
-    int         in0_;    /* n          */
-    int         in1_;    /* kl         */
-    int         in2_;    /* ku         */
+    lapack_int  in0_;    /* n          */
+    lapack_int  in1_;    /* kl         */
+    lapack_int  in2_;    /* ku         */
     double*     in3_ =0; /* A          */
     int         in4_;    /* nbatch     */
     int         in5_;    /* nthreads   */
-    int*        out1_=0; /* ipiv       */
+    lapack_int*  out1_=0; /* ipiv       */
     mwSize      dim6_;   /* na         */
     mwSize      dim7_;   /* nb         */
 
@@ -1075,19 +1081,19 @@ void mexStub1(int nlhs, mxArray* plhs[],
     if( mxGetClassID(prhs[0]) != mxDOUBLE_CLASS )
         mw_err_txt_ = "Invalid scalar argument, mxDOUBLE_CLASS expected";
     if (mw_err_txt_) goto mw_err_label;
-    in0_ = (int) mxWrapGetScalar(prhs[0], &mw_err_txt_);
+    in0_ = (lapack_int) mxWrapGetScalar(prhs[0], &mw_err_txt_);
     if (mw_err_txt_)
         goto mw_err_label;
     if( mxGetClassID(prhs[1]) != mxDOUBLE_CLASS )
         mw_err_txt_ = "Invalid scalar argument, mxDOUBLE_CLASS expected";
     if (mw_err_txt_) goto mw_err_label;
-    in1_ = (int) mxWrapGetScalar(prhs[1], &mw_err_txt_);
+    in1_ = (lapack_int) mxWrapGetScalar(prhs[1], &mw_err_txt_);
     if (mw_err_txt_)
         goto mw_err_label;
     if( mxGetClassID(prhs[2]) != mxDOUBLE_CLASS )
         mw_err_txt_ = "Invalid scalar argument, mxDOUBLE_CLASS expected";
     if (mw_err_txt_) goto mw_err_label;
-    in2_ = (int) mxWrapGetScalar(prhs[2], &mw_err_txt_);
+    in2_ = (lapack_int) mxWrapGetScalar(prhs[2], &mw_err_txt_);
     if (mw_err_txt_)
         goto mw_err_label;
     if (mxGetM(prhs[3])*mxGetN(prhs[3]) != 0) {
@@ -1108,14 +1114,14 @@ void mexStub1(int nlhs, mxArray* plhs[],
     in5_ = (int) mxWrapGetScalar(prhs[5], &mw_err_txt_);
     if (mw_err_txt_)
         goto mw_err_label;
-    out1_ = (int*) mxMalloc(dim7_*sizeof(int));
+    out1_ = (lapack_int*) mxMalloc(dim7_*sizeof(lapack_int));
     if (mexprofrecord_)
         mexprofrecord_[1]++;
     factor_banded_batch(in0_, in1_, in2_, in3_, out1_, in4_, in5_);
     plhs[0] = mxCreateDoubleMatrix(dim6_, 1, mxREAL);
     mxWrapCopy_double(plhs[0], in3_, dim6_);
     plhs[1] = mxCreateDoubleMatrix(dim7_, 1, mxREAL);
-    mxWrapCopy_int(plhs[1], out1_, dim7_);
+    mxWrapCopy_lapack_int(plhs[1], out1_, dim7_);
 
 mw_err_label:
     if (in3_)  mxFree(in3_);
@@ -1124,21 +1130,21 @@ mw_err_label:
         mexErrMsgTxt(mw_err_txt_);
 }
 
-/* ---- BandedBatch.mw: 110 ----
- * solve_banded_batch(int n, int kl, int ku, double[na] A, int[nb] ipiv, inout double[nb] x, int nbatch, int nthreads);
- * Also at BandedBatch.mw: 116
+/* ---- BandedBatch.mw: 111 ----
+ * solve_banded_batch(lapack_int n, lapack_int kl, lapack_int ku, double[na] A, lapack_int[nb] ipiv, inout double[nb] x, int nbatch, int nthreads);
+ * Also at BandedBatch.mw: 117
  */
-static const char* stubids2_ = "solve_banded_batch(i int, i int, i int, i double[x], i int[x], io double[x], i int, i int)";
+static const char* stubids2_ = "solve_banded_batch(i lapack_int, i lapack_int, i lapack_int, i double[x], i lapack_int[x], io double[x], i int, i int)";
 
 void mexStub2(int nlhs, mxArray* plhs[],
               int nrhs, const mxArray* prhs[])
 {
     const char* mw_err_txt_ = 0;
-    int         in0_;    /* n          */
-    int         in1_;    /* kl         */
-    int         in2_;    /* ku         */
+    lapack_int  in0_;    /* n          */
+    lapack_int  in1_;    /* kl         */
+    lapack_int  in2_;    /* ku         */
     double*     in3_ =0; /* A          */
-    int*        in4_ =0; /* ipiv       */
+    lapack_int*  in4_ =0; /* ipiv       */
     double*     in5_ =0; /* x          */
     int         in6_;    /* nbatch     */
     int         in7_;    /* nthreads   */
@@ -1165,19 +1171,19 @@ void mexStub2(int nlhs, mxArray* plhs[],
     if( mxGetClassID(prhs[0]) != mxDOUBLE_CLASS )
         mw_err_txt_ = "Invalid scalar argument, mxDOUBLE_CLASS expected";
     if (mw_err_txt_) goto mw_err_label;
-    in0_ = (int) mxWrapGetScalar(prhs[0], &mw_err_txt_);
+    in0_ = (lapack_int) mxWrapGetScalar(prhs[0], &mw_err_txt_);
     if (mw_err_txt_)
         goto mw_err_label;
     if( mxGetClassID(prhs[1]) != mxDOUBLE_CLASS )
         mw_err_txt_ = "Invalid scalar argument, mxDOUBLE_CLASS expected";
     if (mw_err_txt_) goto mw_err_label;
-    in1_ = (int) mxWrapGetScalar(prhs[1], &mw_err_txt_);
+    in1_ = (lapack_int) mxWrapGetScalar(prhs[1], &mw_err_txt_);
     if (mw_err_txt_)
         goto mw_err_label;
     if( mxGetClassID(prhs[2]) != mxDOUBLE_CLASS )
         mw_err_txt_ = "Invalid scalar argument, mxDOUBLE_CLASS expected";
     if (mw_err_txt_) goto mw_err_label;
-    in2_ = (int) mxWrapGetScalar(prhs[2], &mw_err_txt_);
+    in2_ = (lapack_int) mxWrapGetScalar(prhs[2], &mw_err_txt_);
     if (mw_err_txt_)
         goto mw_err_label;
     if (mxGetM(prhs[3])*mxGetN(prhs[3]) != 0) {
@@ -1192,7 +1198,7 @@ void mexStub2(int nlhs, mxArray* plhs[],
     } else
         in3_ = NULL;
     if (mxGetM(prhs[4])*mxGetN(prhs[4]) != 0) {
-        in4_ = mxWrapGetArray_int(prhs[4], &mw_err_txt_);
+        in4_ = mxWrapGetArray_lapack_int(prhs[4], &mw_err_txt_);
         if (mw_err_txt_)
             goto mw_err_label;
     } else
@@ -1260,8 +1266,8 @@ void mexFunction(int nlhs, mxArray* plhs[],
     } else if (strcmp(id, "*profile report*") == 0) {
         if (!mexprofrecord_)
             mexPrintf("Profiler inactive\n");
-        mexPrintf("%d calls to BandedBatch.mw:79\n", mexprofrecord_[1]);
-        mexPrintf("%d calls to BandedBatch.mw:110 (BandedBatch.mw:116)\n", mexprofrecord_[2]);
+        mexPrintf("%d calls to BandedBatch.mw:80\n", mexprofrecord_[1]);
+        mexPrintf("%d calls to BandedBatch.mw:111 (BandedBatch.mw:117)\n", mexprofrecord_[2]);
     } else if (strcmp(id, "*profile log*") == 0) {
         FILE* logfp;
         if (nrhs != 2 || mxGetString(prhs[1], id, sizeof(id)) != 0)
@@ -1271,8 +1277,8 @@ void mexFunction(int nlhs, mxArray* plhs[],
             mexErrMsgTxt("Cannot open log for output");
         if (!mexprofrecord_)
             fprintf(logfp, "Profiler inactive\n");
-        fprintf(logfp, "%d calls to BandedBatch.mw:79\n", mexprofrecord_[1]);
-        fprintf(logfp, "%d calls to BandedBatch.mw:110 (BandedBatch.mw:116)\n", mexprofrecord_[2]);
+        fprintf(logfp, "%d calls to BandedBatch.mw:80\n", mexprofrecord_[1]);
+        fprintf(logfp, "%d calls to BandedBatch.mw:111 (BandedBatch.mw:117)\n", mexprofrecord_[2]);
         fclose(logfp);
     } else
         mexErrMsgTxt("Unknown identifier");
