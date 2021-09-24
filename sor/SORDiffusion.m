@@ -31,6 +31,7 @@ function [U, dt] = SORDiffusion(U, params)
 %      PARAMS.NLON:             Number of longitudinal coefficients
 %      PARAMS.DT:               Time step
 %      PARAMS.TEND:             End time
+%      PARAMS.SCHEME:           Time-stepping scheme ('bdf1', 'bdf2', or 'bdf4')
 %      PARAMS.USEHEAVISIDE:     Replace the nonlinearity with a Heaviside
 %      PARAMS.TRUECONSERVATION: Enforce conservation according to the true volume
 %
@@ -64,7 +65,22 @@ nsteps = ceil(tend/dt);
 dt = tend/nsteps;
 
 % Build the Laplace-Beltrami solver
-cscl = -1./(dt*delta^2);
+switch ( lower(params.scheme) )
+    case 'bdf1'
+        cscl = -1/(dt*delta^2);
+        step = @bdf1;
+        multistep = 1;
+    case 'bdf2'
+        cscl = -3/(2*dt*delta^2);
+        step = @bdf2;
+        multistep = 2;
+    case 'bdf4'
+        cscl = -25/(12*dt*delta^2);
+        step = @bdf4;
+        multistep = 4;
+    otherwise
+        error('Unknown time-stepping scheme.');
+end
 L = LaplaceBeltramiDFS(rho, theta, nlon, nlat, cscl, params.nthreads);
 
 if ( ~params.quiet )
@@ -142,9 +158,23 @@ else
 end
 
 t = 0;
+Uold = cell(multistep-1, 1);
+if ( multistep > 1 )
+    % Start the multistep method with a few steps of IMEX BDF1
+    cscl1 = -1/(dt*delta^2);
+    L1 = LaplaceBeltramiDFS(rho, theta, nlon, nlat, cscl1, params.nthreads);
+    for k = 1:multistep-1
+        rhs = bdf1(N, dt, U);
+        Uold{multistep-k} = U;
+        U = L1 \ (cscl1 * rhs);
+        t = t + dt;
+        nsteps = nsteps-1;
+    end
+end
+
 for k = 1:nsteps
 
-    rhs = U + dt*N(U);
+    [rhs, Uold] = step(N, dt, U, Uold);
     U = L \ (cscl * rhs);
     t = t + dt;
 
@@ -169,10 +199,28 @@ end
 
 end
 
+%% Time-stepping schemes
+
+function [rhs, Uold] = bdf1(N, dt, U, Uold)
+    rhs = U + dt*N(U);
+end
+
+function [rhs, Uold] = bdf2(N, dt, U, Uold)
+    rhs = 4/3*U - 1/3*Uold{1} + dt*(4/3*N(U) - 2/3*N(Uold{1}));
+    Uold{1} = U;
+end
+
+function [rhs, Uold] = bdf4(N, dt, U, Uold)
+    rhs = 48/25*U - 36/25*Uold{1} + 16/25*Uold{2} - 3/25*Uold{3} + ...
+          dt*(48/25*N(U) - 72/25*N(Uold{1}) + 48/25*N(Uold{2}) - 12/25*N(Uold{3}));
+    Uold(2:3) = Uold(1:2);
+    Uold{1} = U;
+end
+
+%% Plotting utilities
+
 function X = wrap(X)
-
-X = [X X(:,1)];
-
+    X = [X X(:,1)];
 end
 
 function setupfigure(t)

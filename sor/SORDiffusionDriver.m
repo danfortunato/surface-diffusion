@@ -57,6 +57,7 @@ params.dt   = 0.1;
 params.nlat = 128;
 params.nlon = 128;
 params.nthreads = 8;
+params.scheme = 'bdf4'; % or 'bdf1' or 'bdf2'
 params.useHeaviside     = false;
 params.trueConservation = false;
 
