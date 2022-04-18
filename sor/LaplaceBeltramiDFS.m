@@ -223,6 +223,11 @@ classdef LaplaceBeltramiDFS %#ok<*PROPLC>
             V = integral2( F' * L.normal );
         end
 
+        function normU = norm(L, u)
+            u2 = util.vals2coeffsDbl( util.coeffs2valsDbl(u).^2 );
+            normU = sqrt(L.integral2(u2));
+        end
+
         function dom = domain(L)
             dom = L.dom1;
         end
