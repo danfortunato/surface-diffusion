@@ -11,6 +11,11 @@ classdef LaplaceBeltramiDFS %#ok<*PROPLC>
         x
         y
         z
+        ru
+        rv
+        E
+        F
+        G
         normal % Normal vector to surface (a chebfun2v)
         det    % Determinant of the metric tensor (a chebfun2)
         sdet   % Sqrt determinant of the metric tensor (a chebfun2)
@@ -131,12 +136,12 @@ classdef LaplaceBeltramiDFS %#ok<*PROPLC>
             L.normal = -normal(chebfun2v(L.x, L.y, L.z));
 
             r = chebfun2v(L.x, L.y, L.z);
-            ru = diff(r, 1, 1);
-            rv = diff(r, 1, 2);
-            E = ru'*ru;
-            F = ru'*rv;
-            G = rv'*rv;
-            D = E.*G - F.^2;
+            L.ru = diff(r, 1, 1);
+            L.rv = diff(r, 1, 2);
+            L.E = L.ru'*L.ru;
+            L.F = L.ru'*L.rv;
+            L.G = L.rv'*L.rv;
+            D = L.E.*L.G - L.F.^2;
             L.det = D;
             if ( min2(L.det) < 0 )
                 L.det = L.det + abs(min2(L.det));
@@ -221,6 +226,34 @@ classdef LaplaceBeltramiDFS %#ok<*PROPLC>
         function V = volume(L)
             F = chebfun2v(L.x, L.y, L.z) / 3;
             V = integral2( F' * L.normal );
+        end
+
+        function [ux, uy, uz] = grad(L, u)
+            % Convert from DFS coefficients to chebfun2
+            uvals = real( trigtech.coeffs2vals( trigtech.coeffs2vals(u).' ).' );
+            ufun = chebfun2(uvals, L.dom, 'trig');
+
+            % Evaluate at first-kind Chebyshev points to avoid sampling the poles
+            [ss, tt] = chebpts2(L.ns, L.nt1, L.dom1, 1);
+            pref = chebfunpref(); pref.tech = @chebtech1;
+            E = L.E(ss,tt);
+            F = L.F(ss,tt);
+            G = L.G(ss,tt);
+            D = L.det(ss,tt);
+            d1 = feval(diff(ufun, 1, 1), ss, tt);
+            d2 = feval(diff(ufun, 1, 2), ss, tt);
+            rux = feval(L.ru(1), ss, tt); rvx = feval(L.rv(1), ss, tt);
+            ruy = feval(L.ru(2), ss, tt); rvy = feval(L.rv(2), ss, tt);
+            ruz = feval(L.ru(3), ss, tt); rvz = feval(L.rv(3), ss, tt);
+            uu = (G.*d1-F.*d2)./D;    uv = (E.*d2-F.*d1)./D;
+            ux = chebfun2(uu.*rux + uv.*rvx, L.dom1, pref);
+            uy = chebfun2(uu.*ruy + uv.*rvy, L.dom1, pref);
+            uz = chebfun2(uu.*ruz + uv.*rvz, L.dom1, pref);
+
+            % Convert from chebfun2 to DFS coefficients
+            ux = util.vals2coeffsDbl(ux(L.ss1, L.tt1));
+            uy = util.vals2coeffsDbl(uy(L.ss1, L.tt1));
+            uz = util.vals2coeffsDbl(uz(L.ss1, L.tt1));
         end
 
         function normU = norm(L, u)
