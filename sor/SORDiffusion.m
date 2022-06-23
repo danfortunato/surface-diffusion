@@ -41,6 +41,9 @@ function [U, dt] = SORDiffusion(U, params)
 %      PARAMS.MOVIE:            Flag to plot a movie during simulation
 %      PARAMS.COLORMAP:         Colormap for plotting
 %      PARAMS.MOVFILE:          Filename of movie to output
+%      PARAMS.KEEPALL:          Flag to return an array of solutions at all time points.
+%                               If true, U is returned as a tensor of DFS coefficients.
+%                               U(:,:,k) is the solution at time step k-1.
 
 % Geometry parameters:
 rho   = params.rho;
@@ -86,6 +89,11 @@ switch ( lower(params.scheme) )
         error('Unknown time-stepping scheme.');
 end
 L = LaplaceBeltramiDFS(rho, theta, nlon, nlat, cscl, params.nthreads);
+
+keepAll = false;
+if ( isfield(params, 'keepAll') )
+    keepAll = params.keepAll;
+end
 
 if ( ~params.quiet )
     fprintf('\n')
@@ -161,6 +169,11 @@ else
     N = @N_direct;
 end
 
+if ( keepAll )
+    UU = zeros([size(U) nsteps]);
+    UU(:,:,1) = U;
+end
+
 t = 0;
 Uold = cell(multistep-1, 1);
 if ( multistep > 1 )
@@ -187,6 +200,10 @@ if ( multistep > 1 )
         t = t + dt;
         nsteps = nsteps - 1;
 
+        if ( keepAll )
+            UU(:,:,k+1) = U;
+        end
+
         if ( params.movie )
             V = util.coeffs2valsDbl(U);
             V = real(V);
@@ -208,6 +225,10 @@ for k = 1:nsteps
     U = L \ (cscl * rhs);
     t = t + dt;
 
+    if ( keepAll )
+        UU(:,:,k+multistep) = U;
+    end
+
     if ( params.movie )
         V = util.coeffs2valsDbl(U);
         V = real(V);
@@ -215,7 +236,6 @@ for k = 1:nsteps
         surf(xx, yy, zz, V)
         setupfigure(t)
         drawnow
-
         if ( outputMovie )
             frame = getframe(gcf);
             writeVideo(params.movfile, frame);
@@ -225,6 +245,10 @@ end
 
 if ( outputMovie )
     close(params.movfile);
+end
+
+if ( keepAll )
+    U = UU;
 end
 
 end
