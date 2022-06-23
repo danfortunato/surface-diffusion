@@ -74,6 +74,10 @@ switch ( lower(params.scheme) )
         cscl = -3/(2*dt*delta^2);
         step = @bdf2;
         multistep = 2;
+    case 'bdf3'
+        cscl = -11/(6*dt*delta^2);
+        step = @bdf3;
+        multistep = 3;
     case 'bdf4'
         cscl = -25/(12*dt*delta^2);
         step = @bdf4;
@@ -233,6 +237,13 @@ end
 
 function [rhs, Uold] = bdf2(N, dt, U, Uold)
     rhs = 4/3*U - 1/3*Uold{1} + dt*(4/3*N(U) - 2/3*N(Uold{1}));
+    Uold{1} = U;
+end
+
+function [rhs, Uold] = bdf3(N, dt, U, Uold)
+    rhs = 18/11*U - 9/11*Uold{1} + 2/11*Uold{2} + ...
+        dt*(18/11*N(U) - 18/11*N(Uold{1}) + 6/11*N(Uold{2}));
+    Uold(2) = Uold(1);
     Uold{1} = U;
 end
 
