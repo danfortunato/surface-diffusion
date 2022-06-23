@@ -160,15 +160,41 @@ end
 t = 0;
 Uold = cell(multistep-1, 1);
 if ( multistep > 1 )
-    % Start the multistep method with a few steps of IMEX BDF1
-    cscl1 = -1/(dt*delta^2);
+    % Do a few steps of LIRK4 to start the multistep method
+    cscl1 = -4/(dt*delta^2);
     L1 = LaplaceBeltramiDFS(rho, theta, nlon, nlat, cscl1, params.nthreads);
     for k = 1:multistep-1
-        rhs = bdf1(N, dt, U);
         Uold{multistep-k} = U;
-        U = L1 \ (cscl1 * rhs);
+        rhs = U + dt*1/4*N(U);
+        a = L1 \ (cscl1 * rhs);
+        rhs = U + dt*(delta^2*L1.lap(1/2*a) - 1/4*N(U) + N(a));
+        b = L1 \ (cscl1 * rhs);
+        rhs = U + dt*(delta^2*L1.lap(17/50*a - 1/25*b) - 13/100*N(U) ...
+            + 43/75*N(a) + 8/75*N(b));
+        c = L1 \ (cscl1 * rhs);
+        rhs = U + dt*(delta^2*L1.lap(371/1360*a - 137/2720*b + 15/544*c) ...
+            - 6/85*N(U) + 42/85*N(a) + 179/1360*N(b) - 15/272*N(c));
+        d = L1 \ (cscl1 * rhs);
+        rhs = U + dt*(delta^2*L1.lap(25/24*a - 49/48*b + 125/16*c - 85/12*d) ...
+            + 79/24*N(a) - 5/8*N(b) + 25/2*N(c) - 85/6*N(d));
+        e = L1 \ (cscl1 * rhs);
+        U = U + dt*(delta^2*L1.lap(25/24*a - 49/48*b + 125/16*c - 85/12*d + 1/4*e) ...
+            + 25/24*N(a) - 49/48*N(b) + 125/16*N(c) - 85/12*N(d) + 1/4*N(e));
         t = t + dt;
-        nsteps = nsteps-1;
+        nsteps = nsteps - 1;
+
+        if ( params.movie )
+            V = util.coeffs2valsDbl(U);
+            V = real(V);
+            V = wrap(V);
+            surf(xx, yy, zz, V)
+            setupfigure(t)
+            drawnow
+            if ( outputMovie )
+                frame = getframe(gcf);
+                writeVideo(params.movfile, frame);
+            end
+        end
     end
 end
 
