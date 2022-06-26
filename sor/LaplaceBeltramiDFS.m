@@ -36,6 +36,7 @@ classdef LaplaceBeltramiDFS %#ok<*PROPLC>
         bc
         A  % Banded LU decompositions batched over longitudinal modes
         A0 % LU Decomposition for the zero mode (used only when c=0)
+        Lap
 
     end
 
@@ -104,14 +105,18 @@ classdef LaplaceBeltramiDFS %#ok<*PROPLC>
             Mscl = trigspec.multmat(L.nt, scl);
 
             A = cell(L.ns, 1);
+            L.Lap = cell(L.ns, 1);
             negk = -floor(L.ns/2):-1;
             posk = 1:(floor(L.ns/2)-(mod(L.ns,2)==0));
             prealloc = M2*D2 + M1*D1 - M0 + L.c*Mscl;
+            dMscl = decomposition(Mscl);
             for k = [negk posk]
                 A{os+k} = prealloc + (1-k^2)*M0;
+                L.Lap{os+k} = dMscl \ (M2*D2 + M1*D1 - k^2*M0);
             end
             % The zero mode contains no M0 term
             A{os} = M2*D2 + M1*D1 + L.c*Mscl;
+            L.Lap{os} = dMscl \ (M2*D2 + M1*D1);
 
             fac = chebfun(@(t) sqrt(rho(t).^2.*dt(t).^2 + dr(t).^2).*rho(t).*sin(theta(t)), [0 pi]);
             mm = -floor(L.nt/2):ceil(L.nt/2)-1;
@@ -259,6 +264,16 @@ classdef LaplaceBeltramiDFS %#ok<*PROPLC>
         function normU = norm(L, u)
             u2 = util.vals2coeffsDbl( util.coeffs2valsDbl(u).^2 );
             normU = sqrt(L.integral2(u2));
+        end
+
+        function lapU = lap(L, u)
+            lapU = zeros(size(u));
+            os = floor(L.ns/2) + 1;
+            negk = -floor(L.ns/2):-1;
+            posk = 1:(floor(L.ns/2)-(mod(L.ns,2)==0));
+            for k = [negk 0 posk]
+                lapU(:,os+k) = L.Lap{os+k} * u(:,os+k);
+            end
         end
 
         function dom = domain(L)
