@@ -1,6 +1,6 @@
 CXX       = g++
 MEX       = mex
-MWRAP     = ~/ceph/mwrap/mwrap
+MWRAP     = mwrap
 LIBS      = -llapacke -llapack -lgomp
 MATLABDIR = /usr/local/MATLAB/R2021a
 CXXFLAGS  = -fopenmp -O3 -march=native -fPIC -fno-math-errno -idirafter $(MATLABDIR)/extern/include
