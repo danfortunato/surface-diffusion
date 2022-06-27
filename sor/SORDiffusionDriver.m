@@ -1,5 +1,5 @@
 %% Geometry
-shape = 'ufo';
+shape = 'prolate';
 
 switch lower(shape)
     case 'sphere'
