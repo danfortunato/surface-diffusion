@@ -42,7 +42,7 @@ switch lower(shape)
         rho = @(t) sqrt(x(t).^2 + y(t).^2);
         theta = @(t) acos(x(t)./rho(t));
     case 'hourglass'
-        a = 0.97;
+        a = 0.7;
         b = 1;
         rho = @(t) 2.*a.^2 .*(cos(2.*t) + sqrt((b/a).^4 - sin(2.*t).^2));
         theta = @(t) t;
