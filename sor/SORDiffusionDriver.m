@@ -33,6 +33,19 @@ switch lower(shape)
         sabs = @(x) sqrt(x.^2 + a^2);
         rho = @(t) 1 - a*erf((t-pi/2)/a);
         theta = @(t) b - a + 2*(1-(b-a)/pi)*sabs(t-pi/2);
+    case 'egg'
+        b = 1;
+        d = 0.1;
+        a = 2;
+        x = @(t) (sqrt(a^2 - d^2.*sin(t).^2)  + d.*cos(t)).*cos(t);
+        y = @(t) b.*sin(t);
+        rho = @(t) sqrt(x(t).^2 + y(t).^2);
+        theta = @(t) acos(x(t)./rho(t));
+    case 'hourglass'
+        a = 0.97;
+        b = 1;
+        rho = @(t) 2.*a.^2 .*(cos(2.*t) + sqrt((b/a).^4 - sin(2.*t).^2));
+        theta = @(t) t;
     otherwise
         error('Unknown shape.');
 end
@@ -66,6 +79,7 @@ params.quiet    = false;
 params.movie    = true;
 params.colormap = 'jet';
 % params.movfile  = VideoWriter('prolate_polarization.mp4', 'MPEG-4');
+params.keepAll = false;
 
 %% Initial conditions:
 init = 'gaussian';
