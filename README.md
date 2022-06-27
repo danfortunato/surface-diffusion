@@ -1,4 +1,4 @@
-# Surface diffusion
+# Spectral methods for bulk-surface diffusion
 
 Requirements:
 * [Chebfun](http://www.chebfun.org/) for conveniently computing with smooth functions in MATLAB.
