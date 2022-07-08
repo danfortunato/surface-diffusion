@@ -140,3 +140,11 @@ Geometry parameters, biological parameters, discretization parameters, and visua
     <td>Flag to return an array of solutions at all time points</td>
   </tr>
 </table>
+
+## Replicating results from the paper
+
+Geometries studied in the paper are included as preset options at the beginning of `sor/SORDiffusionDriver.m` and most results from the paper can be easily replicated by choosing the appropriate shape and parameters consistent with those given in the paper.
+
+Altering the PDE requires direct modification of `sor/SORDiffusion.m` (or equivalent files for the spherical or toroidal cases). To change the chemical reactions present (as in the Supplementary Material) one must define a new nonlinear function; see `N_direct` and `N_heaviside` in `sor/SORDiffusion.m` for examples.
+
+For analysis of interface length, we have included a function `+util/interface_length.m` which calculates the arc length of a chosen level set `gamma` of the given coefficient matrix `U` and position matrices `xx`, `yy`, and `zz`, as defined in `sor/SORDiffusionDriver.m`. The analysis in Figure 2 of the paper can be replicated by enabling `params.keepAll` and then calling `util.interface_length` sequentially on `U(:,:,k)` for each time point `k`.
