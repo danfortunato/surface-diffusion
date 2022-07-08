@@ -37,8 +37,106 @@ Finally, add this repository to the MATLAB path. In MATLAB, run:
 
 ## Driver scripts
 
-Driver scripts are provided for surfaces of revolution (`sor/SORDiffusionDriver.m`) as well as for the sphere (`sphere/SphericalDiffusionDriver.m`) and the torus (`torus/TorusDiffusionDriver.m`). Biological parameters, discretization parameters, and visualization parameters may be modified in the driver scripts. To choose a surface of revolution in `sor/SORDiffusionDriver.m`, change the variable `shape` to one of the geometries listed (e.g., `shape = 'oblate';`). To run the driver script in MATLAB:
+Driver scripts are provided for surfaces of revolution (`sor/SORDiffusionDriver.m`) as well as for the sphere (`sphere/SphericalDiffusionDriver.m`) and the torus (`torus/TorusDiffusionDriver.m`). To choose a surface of revolution in `sor/SORDiffusionDriver.m`, change the variable `shape` to one of the geometries listed (e.g., `shape = 'oblate';`). To run the driver script in MATLAB:
 ```
 >> cd surface-diffusion/sor
 >> SORDiffusionDriver
 ```
+
+Geometry parameters, biological parameters, discretization parameters, and visualization parameters may be modified in the driver scripts. A brief summary of the parameters is given below.
+
+### Geometry parameters
+
+<table>
+  <tr>
+    <td><code>params.rho</code></td>
+    <td>Radial spherical coordinate of generating curve</td>
+  </tr>
+  <tr>
+    <td><code>params.theta</code></td>
+    <td>Angular spherical coordinate of generating curve</td>
+  </tr>
+</table>
+
+### Biological parameters
+
+<table>
+  <tr>
+    <td><code>params.delta</code></td>
+    <td>Diffusivity</td>
+  </tr>
+  <tr>
+    <td><code>params.alpha</code></td>
+    <td>Coupling parameter</td>
+  </tr>
+  <tr>
+    <td><code>params.beta</code></td>
+    <td>Constitutive rate</td>
+  </tr>
+  <tr>
+    <td><code>params.gamma</code></td>
+    <td>Membrane recruitment threshold</td>
+  </tr>
+  <tr>
+    <td><code>params.nu</code></td>
+    <td>Cooperativity parameter</td>
+  </tr>
+</table>
+
+### Discretization parameters
+
+<table>
+  <tr>
+    <td><code>params.nlat</code></td>
+    <td>Number of latitudinal coefficients</td>
+  </tr>
+  <tr>
+    <td><code>params.nlon</code></td>
+    <td>Number of longitudinal coefficients</td>
+  </tr>
+  <tr>
+    <td><code>params.dt</code></td>
+    <td>Time step</td>
+  </tr>
+  <tr>
+    <td><code>params.tend</code></td>
+    <td>End time</td>
+  </tr>
+  <tr>
+    <td><code>params.scheme</code></td>
+    <td>Time-stepping scheme (<code>'bdf1'</code>, <code>'bdf2'</code>, or <code>'bdf4'</code>)</td>
+  </tr>
+  <tr>
+    <td><code>params.useHeaviside</code></td>
+    <td>Replace the nonlinearity with a Heaviside</td>
+  </tr>
+  <tr>
+    <td><code>params.trueConservation</code></td>
+    <td>Enforce conservation according to the true volume</td>
+  </tr>
+</table>
+
+### Visualization parameters
+
+<table>
+  <tr>
+    <td><code>params.quiet</code></td>
+    <td>Flag to keep quiet</td>
+  </tr>
+  <tr>
+    <td><code>params.movie</code></td>
+    <td>Flag to plot a movie during simulation</td>
+  </tr>
+  <tr>
+    <td><code>params.colormap</code></td>
+    <td>Colormap for plotting</td>
+  </tr>
+  <tr>
+    <td><code>params.movfile</code></td>
+    <td>Filename of movie to output</td>
+  </tr>
+  <tr>
+    <td><code>params.keepAll</code></td>
+    <td>Flag to return an array of solutions at all time points</td>
+  </tr>
+</table>
