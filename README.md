@@ -1,6 +1,6 @@
 # Spectral methods for reaction-diffusion on axisymmetric surfaces
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.6762738.svg)](https://doi.org/10.5281/zenodo.6762738)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.6762737.svg)](https://doi.org/10.5281/zenodo.6762737)
 
 This repository contains source code accompanying the paper "Forced and spontaneous symmetry breaking in cell polarization" by P. Miller, D. Fortunato, C. Muratov, L. Greengard, and S. Shvartsman.
 
